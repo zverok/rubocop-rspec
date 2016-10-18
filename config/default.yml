@@ -103,6 +103,10 @@ RSpec/MessageExpectation:
   - allow
   - expect
 
+RSpec/MockNotStub:
+  Description: Checks that stubs aren't added to mocks.
+  Enabled: true
+
 RSpec/MultipleDescribes:
   Description: Checks for multiple top level describes.
   Enabled: true
