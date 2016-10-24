@@ -27,8 +27,8 @@ module RuboCop
           (send
             (send nil :expect ...) :to
             {
-              (send #receive :and_return $_)
-              (block #receive (args) $_)
+              $(send #receive :and_return _)
+              $(block #receive (args) _)
             }
           )
         PATTERN
@@ -42,7 +42,24 @@ module RuboCop
 
         def on_send(node)
           message_expectation_with_return_block(node) do |match|
-            add_offense(match, :expression)
+            source_map = match.loc
+
+            offending_range =
+              if match.send_type?
+                Parser::Source::Range.new(
+                  source_map.expression.source_buffer,
+                  source_map.dot.begin_pos,
+                  source_map.end.end_pos
+                )
+              else
+                Parser::Source::Range.new(
+                  source_map.expression.source_buffer,
+                  source_map.begin.begin_pos,
+                  source_map.end.end_pos
+                )
+              end
+
+            add_offense(match, offending_range)
           end
         end
       end
