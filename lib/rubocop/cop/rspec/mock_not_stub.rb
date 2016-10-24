@@ -23,13 +23,17 @@ module RuboCop
 
         MSG = "Don't stub your mock.".freeze
 
+        def_node_matcher :message_expectation_with_return_argument, <<-PATTERN
+          (send
+            (send nil :expect ...) :to
+            $(send #receive :and_return _)
+          )
+        PATTERN
+
         def_node_matcher :message_expectation_with_return_block, <<-PATTERN
           (send
             (send nil :expect ...) :to
-            {
-              $(send #receive :and_return _)
-              $(block #receive (args) _)
-            }
+            $(block #receive (args) _)
           )
         PATTERN
 
@@ -41,26 +45,29 @@ module RuboCop
         PATTERN
 
         def on_send(node)
-          message_expectation_with_return_block(node) do |match|
-            source_map = match.loc
-
-            offending_range =
-              if match.send_type?
-                Parser::Source::Range.new(
-                  source_map.expression.source_buffer,
-                  source_map.dot.begin_pos,
-                  source_map.end.end_pos
-                )
-              else
-                Parser::Source::Range.new(
-                  source_map.expression.source_buffer,
-                  source_map.begin.begin_pos,
-                  source_map.end.end_pos
-                )
-              end
-
-            add_offense(match, offending_range)
+          message_expectation_with_return_argument(node) do |match|
+            add_offense(match, offending_argument_range(match.loc))
           end
+
+          message_expectation_with_return_block(node) do |match|
+            add_offense(match, offending_block_range(match.loc))
+          end
+        end
+
+        def offending_argument_range(source_map)
+          Parser::Source::Range.new(
+            source_map.expression.source_buffer,
+            source_map.dot.begin_pos,
+            source_map.end.end_pos
+          )
+        end
+
+        def offending_block_range(source_map)
+          Parser::Source::Range.new(
+            source_map.expression.source_buffer,
+            source_map.begin.begin_pos,
+            source_map.end.end_pos
+          )
         end
       end
     end
