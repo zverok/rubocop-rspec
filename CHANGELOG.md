@@ -3,6 +3,7 @@
 ## Master (Unreleased)
 
 * Add `RSpec/Capybara` namespace including the first cop for feature specs: `Capybara/FeatureMethods`. ([@rspeicher][])
+* Add `FactoryGirl/CreateList` cop. ([@Darhazer][])
 
 ## 1.16.0 (2017-09-06)
 
