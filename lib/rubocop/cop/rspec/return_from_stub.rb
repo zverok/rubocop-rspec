@@ -71,11 +71,7 @@ module RuboCop
         private
 
         def dynamic?(node)
-          if node.array_type?
-            return node.each_child_node.any? { |child| dynamic?(child) }
-          end
-
-          !node.literal?
+          !node.recursive_literal?
         end
       end
     end

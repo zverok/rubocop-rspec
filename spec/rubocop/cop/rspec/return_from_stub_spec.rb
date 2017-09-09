@@ -26,6 +26,15 @@ RSpec.describe RuboCop::Cop::RSpec::ReturnFromStub, :config do
       RUBY
     end
 
+    it 'finds hash with only static values returned from block' do
+      expect_offense(<<-RUBY)
+        it do
+          allow(Foo).to receive(:bar) { {a: 42, b: 43} }
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use `and_return` for static values.
+        end
+      RUBY
+    end
+
     it 'ignores dynamic values returned from block' do
       expect_no_offenses(<<-RUBY)
         it do
@@ -52,6 +61,35 @@ RSpec.describe RuboCop::Cop::RSpec::ReturnFromStub, :config do
         end
       RUBY
     end
+
+    it 'ignores hash with dynamic values returned from block' do
+      expect_no_offenses(<<-RUBY)
+        it do
+          allow(Foo).to receive(:bar) { {a: 42, b: baz} }
+        end
+      RUBY
+    end
+
+    it 'ignores block returning string with interpolation' do
+      expect_no_offenses(<<-RUBY)
+        it do
+          bar = 42
+          allow(Foo).to receive(:bar) { "You called \#{bar}" }
+        end
+      RUBY
+    end
+
+    it 'finds concatenated strings with no variables' do
+      expect_no_offenses(<<-RUBY)
+        it do
+          bar = 42
+          allow(Foo).to receive(:bar) do
+            "You called" \
+            "me"
+          end
+        end
+      RUBY
+    end
   end
 
   context 'with EnforcedStyle `block`' do
@@ -70,6 +108,15 @@ RSpec.describe RuboCop::Cop::RSpec::ReturnFromStub, :config do
       expect_no_offenses(<<-RUBY)
         it do
           allow(Foo).to receive(:bar).and_return(baz)
+        end
+      RUBY
+    end
+
+    it 'ignores string with interpolation returned from method' do
+      expect_no_offenses(<<-RUBY)
+        it do
+          bar = 42
+          allow(Foo).to receive(:bar).and_return("You called \#{bar}")
         end
       RUBY
     end

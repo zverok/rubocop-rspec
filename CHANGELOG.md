@@ -3,6 +3,7 @@
 ## Master (Unreleased)
 
 * Add `RSpec/Capybara` namespace including the first cop for feature specs: `Capybara/FeatureMethods`. ([@rspeicher][])
+* Fixed false positives in 'RSpec/ReturnFromStub' when string with variables interpolated is used. ([@Darhazer][])
 
 ## 1.16.0 (2017-09-06)
 
